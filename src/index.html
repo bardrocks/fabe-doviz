@@ -17,36 +17,41 @@
   </header>
 
   <main id="viewMain">
-    <section class="card">
-      <label for="amount" class="label">Ödenecek tutar (USD)</label>
-      <div class="amount-wrap">
+    <section class="card inputs">
+      <div class="label">Tutar girin, diğerleri hesaplansın</div>
+      <div class="field" id="fUSD">
         <span class="cur">$</span>
-        <input id="amount" inputmode="decimal" autocomplete="off" placeholder="0" autofocus>
+        <input id="inUSD" data-cur="USD" inputmode="decimal" autocomplete="off" placeholder="0" autofocus>
+        <span class="code">USD</span>
+        <button class="copy" data-cur="USD" title="Kopyala">⧉</button>
+      </div>
+      <div class="field" id="fEUR">
+        <span class="cur">€</span>
+        <input id="inEUR" data-cur="EUR" inputmode="decimal" autocomplete="off" placeholder="0">
+        <span class="code">EUR</span>
+        <button class="copy" data-cur="EUR" title="Kopyala">⧉</button>
+      </div>
+      <div class="field" id="fTL">
+        <span class="cur">₺</span>
+        <input id="inTL" data-cur="TL" inputmode="decimal" autocomplete="off" placeholder="0">
+        <span class="code">TL</span>
+        <button class="copy" data-cur="TL" title="Kopyala">⧉</button>
       </div>
     </section>
 
-    <section class="results">
-      <button class="result" id="resTl" title="Kopyalamak için tıkla">
-        <div class="r-label">TL olarak</div>
-        <div class="r-value"><span id="valTl">–</span> <small>₺</small></div>
-        <div class="r-sub" id="subTl">&nbsp;</div>
-      </button>
-      <button class="result" id="resEur" title="Kopyalamak için tıkla">
-        <div class="r-label">EUR olarak</div>
-        <div class="r-value"><span id="valEur">–</span> <small>€</small></div>
-        <div class="r-sub" id="subEur">&nbsp;</div>
-      </button>
-    </section>
-
+    <div id="manualBar" class="manual-bar hidden">
+      <span id="manualText">Manuel kur kullanılıyor</span>
+      <button id="btnAllLive" class="link">Canlı kura dön</button>
+    </div>
     <div id="warn" class="warn hidden"></div>
 
     <section class="card rates">
       <table>
-        <thead><tr><th>nadirdoviz.com</th><th>Alış</th><th>Satış</th></tr></thead>
+        <thead><tr><th>nadirdoviz.com</th><th>Alış</th><th>Satış</th><th>Hesapta</th></tr></thead>
         <tbody>
-          <tr><td>USD/TL</td><td id="usdtl-alis">…</td><td id="usdtl-satis">…</td></tr>
-          <tr><td>EUR/TL</td><td id="eurtl-alis">…</td><td id="eurtl-satis">…</td></tr>
-          <tr><td>EUR/USD</td><td id="eurusd-alis">…</td><td id="eurusd-satis">…</td></tr>
+          <tr><td>USD/TL</td><td id="USD/TL-alis">…</td><td id="USD/TL-satis">…</td><td class="eff" id="USD/TL-eff">…</td></tr>
+          <tr><td>EUR/TL</td><td id="EUR/TL-alis">…</td><td id="EUR/TL-satis">…</td><td class="eff" id="EUR/TL-eff">…</td></tr>
+          <tr><td>EUR/USD</td><td id="EUR/USD-alis">…</td><td id="EUR/USD-satis">…</td><td class="eff" id="EUR/USD-eff">…</td></tr>
         </tbody>
       </table>
       <div class="status"><span id="status">Kurlar yükleniyor…</span><button id="btnRefresh" class="link">Yenile</button></div>
@@ -56,22 +61,10 @@
 
   <main id="viewSettings" class="hidden">
     <section class="card form">
-      <h3>USD → TL</h3>
-      <label>Kullanılacak kur
-        <select id="tlSide"><option value="alis">Alış</option><option value="satis">Satış</option></select>
-      </label>
-      <label>Kura düzeltme (ör. -0,0500)
-        <input id="tlAdjust" inputmode="decimal">
-      </label>
-
-      <h3>USD → EUR (parite)</h3>
-      <label>Kullanılacak parite
-        <select id="pariteSide"><option value="alis">Alış</option><option value="satis">Satış</option></select>
-      </label>
-      <label>Pariteye düzeltme (ör. -0,0100)
-        <input id="pariteAdjust" inputmode="decimal">
-      </label>
-      <p class="hint">Örnek: parite 1,0941 ve düzeltme -0,0100 ise hesap 1,0841'den yapılır.</p>
+      <h3>Kurlar</h3>
+      <p class="hint top">Her kur için canlı Alış/Satış ya da elle girilen bir değer seçin. Manuel kur siz değiştirene kadar kayıtlı kalır.</p>
+      <div id="rateForms"></div>
+      <button id="btnFormAllLive" class="link block">Tüm kurları canlıya döndür</button>
 
       <h3>Genel</h3>
       <label class="check"><input type="checkbox" id="alwaysOnTop"> Her zaman üstte</label>

@@ -36,24 +36,29 @@ main { padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow
 .card { background: #16213a; border: 1px solid #1e293b; border-radius: 12px; padding: 12px; }
 .label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
 
-.amount-wrap { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-.cur { font-size: 28px; color: #64748b; font-weight: 600; }
-#amount {
-  flex: 1; min-width: 0; font-size: 32px; font-weight: 700; background: transparent; border: 0; color: #fff; outline: none;
-  user-select: text;
+.inputs { display: flex; flex-direction: column; gap: 6px; }
+.field {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px;
+  background: #1d2b4a; border: 1px solid #2b3d63;
 }
+.field.active { border-color: #3b82f6; background: #1e3a6b; }
+.field .cur { font-size: 22px; color: #64748b; font-weight: 600; width: 20px; text-align: center; }
+.field input {
+  flex: 1; min-width: 0; font-size: 24px; font-weight: 700; background: transparent; border: 0; color: #fff; outline: none;
+  user-select: text; font-variant-numeric: tabular-nums;
+}
+#fTL input { color: #fde68a; }
+#fEUR input { color: #93c5fd; }
+.field.active input { color: #fff; }
+.field .code { color: #64748b; font-size: 12px; font-weight: 600; }
+.field .copy { background: transparent; border: 0; color: #64748b; font-size: 15px; padding: 2px 4px; border-radius: 6px; }
+.field .copy:hover { color: #fff; background: #2b3d63; }
 
-.results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.result {
-  text-align: left; background: #1d2b4a; border: 1px solid #2b3d63; border-radius: 12px; padding: 12px; color: inherit;
+.manual-bar {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  background: #3b1d5a; border: 1px solid #7e22ce; color: #e9d5ff; border-radius: 8px; padding: 7px 10px; font-size: 12px;
 }
-.result:hover { border-color: #3b82f6; }
-.r-label { color: #94a3b8; font-size: 12px; }
-.r-value { font-size: 22px; font-weight: 700; color: #fff; margin: 4px 0; word-break: break-all; }
-.r-value small { font-size: 14px; color: #94a3b8; }
-#resTl .r-value { color: #fde68a; }
-#resEur .r-value { color: #93c5fd; }
-.r-sub { color: #64748b; font-size: 12px; }
+.manual-bar .link { color: #f0abfc; font-size: 12px; font-weight: 600; white-space: nowrap; }
 
 .warn { background: #422006; border: 1px solid #a16207; color: #fde68a; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
 
@@ -62,7 +67,10 @@ main { padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow
 .rates th:first-child { text-align: left; }
 .rates td { padding: 5px 4px; text-align: right; font-variant-numeric: tabular-nums; border-top: 1px solid #1e293b; }
 .rates td:first-child { text-align: left; font-weight: 600; }
-.rates td.used { color: #fbbf24; font-weight: 700; }
+.rates td.used { color: #fbbf24; }
+.rates td.eff { color: #fff; font-weight: 700; }
+.rates td.eff.manual { color: #f0abfc; }
+.rates td.eff.manual::after { content: " M"; font-size: 10px; color: #c084fc; }
 .status { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; color: #64748b; font-size: 11px; gap: 8px; }
 .link { background: none; border: 0; color: #60a5fa; padding: 0; font-size: 11px; }
 
@@ -83,3 +91,15 @@ main { padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow
 .buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 .buttons button { border: 0; border-radius: 8px; padding: 8px 16px; background: #2563eb; color: #fff; font-weight: 600; }
 .buttons button.secondary { background: #334155; }
+
+.hint.top { margin: 0 0 8px; }
+.rate-form { border-top: 1px solid #1e293b; padding: 8px 0; }
+.rf-head { display: flex; justify-content: space-between; align-items: baseline; }
+.rf-head b { color: #e2e8f0; }
+.rf-live { color: #64748b; font-size: 11px; }
+.rf-help { color: #64748b; font-size: 11px; margin: 2px 0 6px; }
+.rf-row { display: flex; gap: 6px; align-items: center; }
+.form .rf-row select, .form .rf-row input:not([type=checkbox]) { margin-top: 0; }
+.rf-row select { flex: 1.3; }
+.rf-row input { flex: 1; min-width: 0; }
+.link.block { display: block; margin: 6px 0 4px; font-size: 12px; }

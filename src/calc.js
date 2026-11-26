@@ -48,20 +48,102 @@
     return Math.round((value + Number.EPSILON) * f) / f;
   }
 
+  const PAIRS = ['USD/TL', 'EUR/TL', 'EUR/USD'];
+
   /*
-   * rates: { 'USD/TL': {alis, satis}, 'EUR/TL': {...}, 'EUR/USD': {...} } (sayılar)
-   * settings: { tlSide, tlAdjust, pariteSide, pariteAdjust }
+   * Varsayılan kur ayarları. Her kur için:
+   *   source: 'alis' | 'satis' (canlı kur) veya 'manual' (elle girilen)
+   *   adjust: canlı kura eklenecek düzeltme (ör. -0.01)
+   *   manual: elle girilen kur (source 'manual' iken kullanılır)
    */
-  function convert(usd, rates, settings) {
-    const usdTl = rates['USD/TL'][settings.tlSide] + Number(settings.tlAdjust || 0);
-    const parite = rates['EUR/USD'][settings.pariteSide] + Number(settings.pariteAdjust || 0);
-    if (!(usdTl > 0) || !(parite > 0)) throw new Error('Geçersiz kur');
+  function defaultRateSettings() {
     return {
-      usdTl: round(usdTl, 4),
-      parite: round(parite, 4),
-      tl: round(usd * usdTl, 2),
-      eur: round(usd / parite, 2),
+      'USD/TL': { source: 'alis', adjust: 0, manual: null },
+      'EUR/TL': { source: 'alis', adjust: 0, manual: null },
+      'EUR/USD': { source: 'alis', adjust: -0.01, manual: null },
     };
+  }
+
+  // Eski ayar biçimini (tlSide/tlAdjust/pariteSide/pariteAdjust) yenisine çevirir
+  function normalizeRateSettings(settings) {
+    const def = defaultRateSettings();
+    const s = settings || {};
+    if (!s.rates) {
+      if (s.tlSide) def['USD/TL'].source = s.tlSide;
+      if (s.tlAdjust != null) def['USD/TL'].adjust = Number(s.tlAdjust) || 0;
+      if (s.pariteSide) def['EUR/USD'].source = s.pariteSide;
+      if (s.pariteAdjust != null) def['EUR/USD'].adjust = Number(s.pariteAdjust) || 0;
+      return def;
+    }
+    for (const p of PAIRS) {
+      const r = s.rates[p] || {};
+      const source = ['alis', 'satis', 'manual'].includes(r.source) ? r.source : def[p].source;
+      const manual = Number(r.manual);
+      def[p] = {
+        source: source === 'manual' && !(manual > 0) ? 'alis' : source,
+        adjust: Number.isFinite(Number(r.adjust)) ? Number(r.adjust) : def[p].adjust,
+        manual: manual > 0 ? manual : null,
+      };
+    }
+    return def;
+  }
+
+  /*
+   * Hesapta kullanılacak kurları belirler.
+   * live: { 'USD/TL': {alis, satis}, ... } veya null (canlı kur yok / eski)
+   * Dönen: { 'USD/TL': { value, manual } | null, ... }
+   */
+  function effectiveRates(live, rateSettings) {
+    const rs = normalizeRateSettings({ rates: rateSettings });
+    const out = {};
+    for (const p of PAIRS) {
+      const r = rs[p];
+      if (r.source === 'manual') {
+        out[p] = { value: round(r.manual, 4), manual: true };
+      } else if (live && live[p] && Number.isFinite(live[p][r.source])) {
+        const v = live[p][r.source] + r.adjust;
+        out[p] = v > 0 ? { value: round(v, 4), manual: false } : null;
+      } else {
+        out[p] = null;
+      }
+    }
+    return out;
+  }
+
+  /*
+   * Hangi para birimine yazıldıysa diğer ikisini hesaplar.
+   * from: 'USD' | 'EUR' | 'TL'. Kuru olmayan sonuç null döner.
+   *   USD -> TL : × USD/TL      USD -> EUR : ÷ EUR/USD
+   *   EUR -> TL : × EUR/TL      EUR -> USD : × EUR/USD
+   *   TL  -> USD: ÷ USD/TL      TL  -> EUR : ÷ EUR/TL
+   */
+  function convertFrom(from, amount, eff) {
+    const v = (p) => (eff[p] ? eff[p].value : null);
+    const usdTl = v('USD/TL'), eurTl = v('EUR/TL'), parite = v('EUR/USD');
+    const r2 = (x) => (x == null || !Number.isFinite(x) ? null : round(x, 2));
+    const res = { USD: null, EUR: null, TL: null };
+    res[from] = amount;
+    if (from === 'USD') {
+      res.TL = usdTl ? r2(amount * usdTl) : null;
+      res.EUR = parite ? r2(amount / parite) : null;
+    } else if (from === 'EUR') {
+      res.TL = eurTl ? r2(amount * eurTl) : null;
+      res.USD = parite ? r2(amount * parite) : null;
+    } else if (from === 'TL') {
+      res.USD = usdTl ? r2(amount / usdTl) : null;
+      res.EUR = eurTl ? r2(amount / eurTl) : null;
+    } else {
+      throw new Error('Bilinmeyen para birimi: ' + from);
+    }
+    return res;
+  }
+
+  // Eski arayüzle uyumluluk: USD tutarından TL ve EUR
+  function convert(usd, rates, settings) {
+    const eff = effectiveRates(rates, normalizeRateSettings(settings));
+    if (!eff['USD/TL'] || !eff['EUR/USD']) throw new Error('Geçersiz kur');
+    const c = convertFrom('USD', usd, eff);
+    return { usdTl: eff['USD/TL'].value, parite: eff['EUR/USD'].value, tl: c.TL, eur: c.EUR };
   }
 
   /*
@@ -93,5 +175,8 @@
     return { ok: true, rates };
   }
 
-  return { parseSiteNumber, parseAmount, round, convert, validateRates };
+  return {
+    PAIRS, parseSiteNumber, parseAmount, round, convert, convertFrom,
+    effectiveRates, defaultRateSettings, normalizeRateSettings, validateRates,
+  };
 });

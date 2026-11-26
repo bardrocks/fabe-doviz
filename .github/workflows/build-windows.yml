@@ -1,0 +1,42 @@
+name: Windows uygulamasını derle
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FabeDovizHesap-Windows
+          path: dist/*.exe
+      - name: Sürümü oku
+        id: ver
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: İndirme sayfasına (Release) yükle
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: Fabe Döviz Hesap ${{ steps.ver.outputs.version }}
+          body: |
+            Windows için iki seçenek:
+            - **FabeDovizHesap-Kurulum-${{ steps.ver.outputs.version }}.exe**: kurulum yapar, masaüstü kısayolu oluşturur
+            - **FabeDovizHesap-Portable-${{ steps.ver.outputs.version }}.exe**: kurulumsuz, çift tıkla çalışır
+          files: dist/*.exe
+          overwrite_files: true
+          make_latest: true

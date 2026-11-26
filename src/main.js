@@ -2,14 +2,12 @@ const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, nativeImage, sc
 const path = require('path');
 const fs = require('fs');
 const { Scraper } = require('./scraper');
+const Calc = require('./calc');
 
 const SHORTCUT = 'CommandOrControl+Shift+D';
 
 const DEFAULT_SETTINGS = {
-  tlSide: 'alis',        // USD -> TL hangi kurdan: 'alis' | 'satis'
-  tlAdjust: 0,           // USD/TL kuruna eklenecek düzeltme (ör. -0.05)
-  pariteSide: 'alis',    // EUR/USD paritesi hangi taraftan
-  pariteAdjust: -0.01,   // 1,0941 yerine 1,0841 -> -0,0100
+  rates: Calc.defaultRateSettings(), // USD/TL, EUR/TL, EUR/USD: canlı (alış/satış) veya manuel
   alwaysOnTop: true,
   openAtLogin: false,
 };
@@ -24,7 +22,12 @@ let quitting = false;
 const settingsFile = () => path.join(app.getPath('userData'), 'ayarlar.json');
 function loadSettings() {
   try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) };
+    const saved = JSON.parse(fs.readFileSync(settingsFile(), 'utf8'));
+    return {
+      alwaysOnTop: saved.alwaysOnTop !== undefined ? !!saved.alwaysOnTop : DEFAULT_SETTINGS.alwaysOnTop,
+      openAtLogin: !!saved.openAtLogin,
+      rates: Calc.normalizeRateSettings(saved),
+    };
   } catch (_) {
     return { ...DEFAULT_SETTINGS };
   }
@@ -38,14 +41,14 @@ let settings = DEFAULT_SETTINGS;
 function createWindow() {
   const { workArea } = screen.getPrimaryDisplay();
   const width = 400;
-  const height = 440;
+  const height = 520;
   win = new BrowserWindow({
     width,
     height,
     x: workArea.x + workArea.width - width - 16,
     y: workArea.y + workArea.height - height - 16,
     minWidth: 340,
-    minHeight: 420,
+    minHeight: 480,
     frame: false,
     resizable: true,
     skipTaskbar: false,
@@ -104,6 +107,7 @@ function createTray() {
 ipcMain.handle('get-initial', () => ({ settings, state: lastState, shortcut: 'Ctrl+Shift+D' }));
 ipcMain.handle('save-settings', (_e, s) => {
   settings = { ...settings, ...s };
+  settings.rates = Calc.normalizeRateSettings(settings);
   saveSettings(settings);
   if (win) win.setAlwaysOnTop(!!settings.alwaysOnTop);
   try { app.setLoginItemSettings({ openAtLogin: !!settings.openAtLogin }); } catch (_) {}
