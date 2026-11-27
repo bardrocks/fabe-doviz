@@ -75,6 +75,13 @@ main { padding: 8px; display: flex; flex-direction: column; gap: 8px; overflow: 
 }
 .manual-bar .link { color: #f0abfc; font-size: 12px; font-weight: 600; white-space: nowrap; }
 
+.update-bar {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  background: #052e1a; border: 1px solid #15803d; color: #bbf7d0; border-radius: 8px; padding: 6px 6px 6px 10px; font-size: 12px;
+}
+.update-btn { border: 0; border-radius: 6px; padding: 4px 12px; background: #16a34a; color: #fff; font-weight: 600; font-size: 12px; }
+.update-btn:hover { background: #22c55e; }
+.update-btn:disabled { background: #166534; color: #86efac; cursor: default; }
 .warn { background: #422006; border: 1px solid #a16207; color: #fde68a; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
 
 .rates table { width: 100%; border-collapse: collapse; }

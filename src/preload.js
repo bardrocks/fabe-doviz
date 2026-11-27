@@ -11,6 +11,11 @@ contextBridge.exposeInMainWorld('api', {
   copy: (text) => ipcRenderer.send('copy', text),
   fitHeight: (h) => ipcRenderer.send('fit-height', h),
   setOpacity: (v) => ipcRenderer.send('set-opacity', v),
+  // Güncelleme
+  getUpdate: () => ipcRenderer.invoke('update-state'),
+  onUpdate: (cb) => ipcRenderer.on('update', (_e, s) => cb(s)),
+  checkUpdate: () => ipcRenderer.send('update-check'),
+  applyUpdate: () => ipcRenderer.send('update-apply'),
   // Görev çubuğu kutusu
   onMini: (cb) => ipcRenderer.on('mini', (_e, d) => cb(d)),
   miniClick: () => ipcRenderer.send('mini-click'),

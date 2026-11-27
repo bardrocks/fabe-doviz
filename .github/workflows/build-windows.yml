@@ -22,7 +22,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: FabeDovizHesap-Windows
-          path: dist/*.exe
+          path: |
+            dist/*.exe
+            dist/latest.yml
       - name: Sürümü oku
         id: ver
         shell: bash
@@ -37,6 +39,9 @@ jobs:
             Windows için iki seçenek:
             - **FabeDovizHesap-Kurulum-${{ steps.ver.outputs.version }}.exe**: kurulum yapar, masaüstü kısayolu oluşturur
             - **FabeDovizHesap-Portable-${{ steps.ver.outputs.version }}.exe**: kurulumsuz, çift tıkla çalışır
-          files: dist/*.exe
+          files: |
+            dist/*.exe
+            dist/*.exe.blockmap
+            dist/latest.yml
           overwrite_files: true
           make_latest: true

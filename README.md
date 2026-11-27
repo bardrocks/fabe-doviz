@@ -42,6 +42,15 @@ Varsayılan: tüm kurlar canlı **Alış**, EUR/USD paritesine **-0,0100** düze
   Tıklayınca uygulama açılır/kapanır, sürükleyerek sağa sola taşınır, sağ tıkla kaldırılır.
   Ayarlar > Genel veya tepsi menüsünden açılıp kapatılır.
 
+## Güncelleme
+
+Uygulama açılışta ve 2 saatte bir GitHub Releases'ta yeni sürüm olup olmadığına bakar.
+- **Kurulumlu sürüm**: yeni sürümü arka planda indirir, ana ekranda yeşil **"Yeni sürüm hazır · Güncelle"**
+  şeridi çıkar; tıklayınca kurulur ve yeniden açılır (tıklanmazsa uygulamadan çıkarken kurulur).
+- **Portable sürüm**: kendini değiştiremez; şeritteki **İndir** yeni .exe'yi indirir.
+- Ayarlar > Genel'de sürüm numarası ve **Güncellemeleri denetle** bağlantısı var.
+Bunun çalışması için depo herkese açık olmalı (sürüm dosyaları oradan indirilir).
+
 ## Kullanım
 
 - **Ctrl+Shift+D**: her yerden pencereyi aç / gizle

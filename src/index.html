@@ -45,6 +45,10 @@
       <button id="btnAllLive" class="link">Canlı kura dön</button>
     </div>
     <div id="warn" class="warn hidden"></div>
+    <div id="updateBar" class="update-bar hidden">
+      <span id="updateText">Yeni sürüm var</span>
+      <button id="btnUpdate" class="update-btn">Güncelle</button>
+    </div>
 
     <section class="card rates">
       <table>
@@ -72,6 +76,7 @@
       <label class="check"><input type="checkbox" id="openAtLogin"> Bilgisayar açılınca başlat</label>
       <label class="check"><input type="checkbox" id="taskbarRate"> Görev çubuğunda dolar kuru göster</label>
       <p class="hint">Kısayol: <b id="shortcut">Ctrl+Shift+D</b> ile her yerden aç/kapat.</p>
+      <p class="hint">Sürüm <b id="version"></b> · <span id="updateInfo"></span> <button id="btnCheckUpdate" class="link">Güncellemeleri denetle</button></p>
       <div id="settingsErr" class="warn hidden"></div>
       <div class="buttons">
         <button id="btnCancel" class="secondary">Vazgeç</button>

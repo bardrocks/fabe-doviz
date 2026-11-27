@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { Scraper } = require('./scraper');
 const Calc = require('./calc');
+const { Updater } = require('./updater');
 
 const SHORTCUT = 'CommandOrControl+Shift+D';
 
@@ -22,6 +23,7 @@ let win = null;
 let mini = null;
 let tray = null;
 let lastRates = null;
+let updater = null;
 let scraper = null;
 let lastState = null;
 let quitting = false;
@@ -216,6 +218,9 @@ function rebuildTrayMenu() {
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Göster / Gizle  (Ctrl+Shift+D)', click: toggleWindow },
     { label: 'Kurları yenile', click: () => scraper && scraper.refreshNow() },
+    ...(updater && ['ready', 'available'].includes(updater.state.status)
+      ? [{ label: `Güncelle (sürüm ${updater.state.version})`, click: () => updater.apply(() => { quitting = true; destroyMini(); }) }]
+      : []),
     { label: 'Görev çubuğunda dolar kuru', type: 'checkbox', checked: !!settings.taskbarRate, click: (item) => {
       settings.taskbarRate = item.checked; saveSettings(settings); syncMini();
     } },
@@ -251,6 +256,9 @@ ipcMain.on('set-opacity', (_e, v) => {
   opacitySaveTimer = setTimeout(() => saveSettings(settings), 400);
 });
 ipcMain.on('mini-click', () => toggleWindow());
+ipcMain.handle('update-state', () => (updater ? updater.state : { status: 'idle', current: app.getVersion() }));
+ipcMain.on('update-check', () => updater && updater.check());
+ipcMain.on('update-apply', () => updater && updater.apply(() => { quitting = true; destroyMini(); }));
 ipcMain.on('mini-drag', (_e, dx) => {
   if (!mini || mini.isDestroyed()) return;
   const b = mini.getBounds();
@@ -288,6 +296,11 @@ if (!app.requestSingleInstanceLock()) {
     });
     scraper.start();
     syncMini();
+    updater = new Updater((st) => {
+      if (win && !win.isDestroyed()) win.webContents.send('update', st);
+      rebuildTrayMenu();
+    });
+    updater.start();
     // Görev çubuğuna tıklanınca kutu arkada kalmasın; ekran / görev çubuğu değişirse yeniden yerleş
     setInterval(() => {
       if (!mini || mini.isDestroyed()) return;

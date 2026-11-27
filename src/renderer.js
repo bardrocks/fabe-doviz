@@ -232,6 +232,30 @@
     renderRates();
   }
 
+  // ---------- Güncelleme ----------
+  function renderUpdate(u) {
+    if (!u) return;
+    $('version').textContent = u.current || '';
+    const bar = $('updateBar'), btn = $('btnUpdate');
+    const show = ['downloading', 'ready', 'available'].includes(u.status);
+    bar.classList.toggle('hidden', !show);
+    if (u.status === 'downloading') {
+      $('updateText').textContent = `Yeni sürüm ${u.version} indiriliyor… %${u.percent || 0}`;
+      btn.textContent = 'Bekleyin'; btn.disabled = true;
+    } else if (u.status === 'ready') {
+      $('updateText').textContent = `Yeni sürüm ${u.version} hazır`;
+      btn.textContent = 'Güncelle'; btn.disabled = false;
+    } else if (u.status === 'available') {
+      $('updateText').textContent = `Yeni sürüm ${u.version} var`;
+      btn.textContent = 'İndir'; btn.disabled = false;
+    }
+    const info = { checking: 'denetleniyor…', latest: 'güncel', error: 'güncelleme denetlenemedi', dev: '', idle: '',
+      downloading: `${u.version} indiriliyor`, ready: `${u.version} hazır`, available: `${u.version} var` }[u.status] || '';
+    $('updateInfo').textContent = info;
+    $('updateInfo').title = u.error || '';
+    fit();
+  }
+
   // ---------- Başlat ----------
   async function init() {
     const data = await window.api.getInitial();
@@ -243,6 +267,10 @@
     op.value = Math.round((settings.opacity || 1) * 100);
     op.addEventListener('input', () => window.api.setOpacity(op.value / 100));
     renderRates();
+    renderUpdate(await window.api.getUpdate());
+    window.api.onUpdate(renderUpdate);
+    $('btnUpdate').addEventListener('click', () => window.api.applyUpdate());
+    $('btnCheckUpdate').addEventListener('click', () => window.api.checkUpdate());
     new ResizeObserver(fit).observe($('viewMain'));
     new ResizeObserver(fit).observe($('viewSettings'));
 
