@@ -39,7 +39,8 @@ Varsayılan: tüm kurlar canlı **Alış**, EUR/USD paritesine **-0,0100** düze
 - Başlıktaki kaydırıcı pencerenin **şeffaflığını** ayarlar (%30 – %100); ayar kaydedilir.
 - **Görev çubuğunda dolar kuru**: Windows hava durumu kutusu gibi görev çubuğunun
   üzerinde küçük bir kutuda hesapta kullanılan USD/TL kuru görünür (▲/▼ değişim).
-  Tıklayınca uygulama açılır/kapanır, sürükleyerek sağa sola taşınır, sağ tıkla kaldırılır.
+  Kendiliğinden saatin / ^ okunun hemen soluna yerleşir. Tıklayınca uygulama açılır/kapanır,
+  sürükleyerek sağa sola taşınır, sağ tık menüsünden "Saatin yanına geri al" veya kaldır.
   Ayarlar > Genel veya tepsi menüsünden açılıp kapatılır.
 
 ## Güncelleme

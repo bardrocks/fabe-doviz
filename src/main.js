@@ -4,6 +4,7 @@ const fs = require('fs');
 const { Scraper } = require('./scraper');
 const Calc = require('./calc');
 const { Updater } = require('./updater');
+const { TrayWatch } = require('./traywatch');
 
 const SHORTCUT = 'CommandOrControl+Shift+D';
 
@@ -13,7 +14,7 @@ const DEFAULT_SETTINGS = {
   openAtLogin: false,
   opacity: 1,          // pencere şeffaflığı (0.3 – 1)
   taskbarRate: true,   // görev çubuğunda dolar kuru
-  taskbarX: null,      // görev çubuğu kutusunun yatay konumu (null = sol)
+  taskbarOffset: 0,    // görev çubuğu kutusu: saatin / ^ okunun solundan kaydırma (sürükleyince değişir)
 };
 const MIN_OPACITY = 0.3;
 const WIDTH = 340;
@@ -24,6 +25,7 @@ let mini = null;
 let tray = null;
 let lastRates = null;
 let updater = null;
+let trayWatch = null;
 let scraper = null;
 let lastState = null;
 let quitting = false;
@@ -38,7 +40,7 @@ function loadSettings() {
       openAtLogin: !!saved.openAtLogin,
       opacity: clampOpacity(saved.opacity),
       taskbarRate: saved.taskbarRate !== undefined ? !!saved.taskbarRate : DEFAULT_SETTINGS.taskbarRate,
-      taskbarX: Number.isFinite(saved.taskbarX) ? saved.taskbarX : null,
+      taskbarOffset: Number.isFinite(saved.taskbarOffset) ? saved.taskbarOffset : 0,
       rates: Calc.normalizeRateSettings(saved),
     };
   } catch (_) {
@@ -137,11 +139,18 @@ function taskbarRect() {
   return { y: s.y + s.height - 48, height: 48, s }; // gizlenen / yan görev çubuğu
 }
 
+// Varsayılan yer: bildirim alanının (^ oku + simgeler + saat) hemen solu
+function miniAnchorX(r) {
+  const tw = trayWatch && trayWatch.value;
+  if (tw && tw.notify.y >= r.y - 4 && tw.notify.y < r.y + r.height) return tw.notify.x - MINI_W - 4;
+  return r.s.x + r.s.width - 240 - MINI_W; // bulunamazsa: saat + simgeler için tahmini pay
+}
+
 function miniBounds() {
   const r = taskbarRect();
   const height = Math.min(r.height, 60);
   const maxX = r.s.x + r.s.width - MINI_W;
-  let x = Number.isFinite(settings.taskbarX) ? settings.taskbarX : r.s.x + 8;
+  let x = miniAnchorX(r) + (Number(settings.taskbarOffset) || 0);
   x = Math.max(r.s.x, Math.min(maxX, Math.round(x)));
   return { x, y: r.y + Math.round((r.height - height) / 2), width: MINI_W, height };
 }
@@ -261,10 +270,9 @@ ipcMain.on('update-check', () => updater && updater.check());
 ipcMain.on('update-apply', () => updater && updater.apply(() => { quitting = true; destroyMini(); }));
 ipcMain.on('mini-drag', (_e, dx) => {
   if (!mini || mini.isDestroyed()) return;
-  const b = mini.getBounds();
-  settings.taskbarX = b.x + Math.round(Number(dx) || 0);
+  settings.taskbarOffset = (Number(settings.taskbarOffset) || 0) + Math.round(Number(dx) || 0);
   mini.setBounds(miniBounds());
-  settings.taskbarX = mini.getBounds().x;
+  settings.taskbarOffset = mini.getBounds().x - miniAnchorX(taskbarRect()); // kenara dayandıysa düzelt
 });
 ipcMain.on('mini-drag-end', () => saveSettings(settings));
 ipcMain.on('mini-menu', () => {
@@ -272,6 +280,9 @@ ipcMain.on('mini-menu', () => {
   Menu.buildFromTemplate([
     { label: 'Fabe Döviz Hesap\'ı aç', click: showWindow },
     { label: 'Kurları yenile', click: () => scraper && scraper.refreshNow() },
+    { label: 'Saatin yanına geri al', enabled: !!settings.taskbarOffset, click: () => {
+      settings.taskbarOffset = 0; saveSettings(settings); if (mini && !mini.isDestroyed()) mini.setBounds(miniBounds());
+    } },
     { type: 'separator' },
     { label: 'Görev çubuğundan kaldır', click: () => { settings.taskbarRate = false; saveSettings(settings); syncMini(); rebuildTrayMenu(); } },
   ]).popup({ window: mini });
@@ -309,6 +320,8 @@ if (!app.requestSingleInstanceLock()) {
     }, 1500);
     setInterval(sendMini, 5000);
     const relayout = () => { if (mini && !mini.isDestroyed()) mini.setBounds(miniBounds()); };
+    trayWatch = new TrayWatch(relayout);
+    trayWatch.start();
     screen.on('display-metrics-changed', relayout);
     screen.on('display-added', relayout);
     screen.on('display-removed', relayout);
@@ -316,6 +329,7 @@ if (!app.requestSingleInstanceLock()) {
   });
   app.on('before-quit', () => { quitting = true; });
   app.on('will-quit', () => {
+    if (trayWatch) trayWatch.stop();
     globalShortcut.unregisterAll();
     if (scraper) scraper.stop();
   });
