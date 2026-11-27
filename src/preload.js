@@ -9,4 +9,12 @@ contextBridge.exposeInMainWorld('api', {
   minimize: () => ipcRenderer.send('minimize'),
   refresh: () => ipcRenderer.send('refresh'),
   copy: (text) => ipcRenderer.send('copy', text),
+  fitHeight: (h) => ipcRenderer.send('fit-height', h),
+  setOpacity: (v) => ipcRenderer.send('set-opacity', v),
+  // Görev çubuğu kutusu
+  onMini: (cb) => ipcRenderer.on('mini', (_e, d) => cb(d)),
+  miniClick: () => ipcRenderer.send('mini-click'),
+  miniDrag: (dx) => ipcRenderer.send('mini-drag', dx),
+  miniDragEnd: () => ipcRenderer.send('mini-drag-end'),
+  miniMenu: () => ipcRenderer.send('mini-menu'),
 });

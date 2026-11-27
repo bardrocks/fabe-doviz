@@ -8,7 +8,8 @@
 </head>
 <body>
   <header class="titlebar">
-    <div class="title"><span id="dot" class="dot wait"></span> Fabe Döviz Hesap</div>
+    <div class="title"><span id="dot" class="dot wait"></span> Fabe Döviz</div>
+    <input type="range" id="opacity" class="opacity" min="30" max="100" step="1" value="100" title="Şeffaflık">
     <div class="actions">
       <button id="btnSettings" title="Ayarlar">⚙</button>
       <button id="btnMin" title="Küçült">–</button>
@@ -47,7 +48,7 @@
 
     <section class="card rates">
       <table>
-        <thead><tr><th>nadirdoviz.com</th><th>Alış</th><th>Satış</th><th>Hesapta</th></tr></thead>
+        <thead><tr><th></th><th>Alış</th><th>Satış</th><th>Hesapta</th></tr></thead>
         <tbody>
           <tr><td>USD/TL</td><td id="USD/TL-alis">…</td><td id="USD/TL-satis">…</td><td class="eff" id="USD/TL-eff">…</td></tr>
           <tr><td>EUR/TL</td><td id="EUR/TL-alis">…</td><td id="EUR/TL-satis">…</td><td class="eff" id="EUR/TL-eff">…</td></tr>
@@ -69,6 +70,7 @@
       <h3>Genel</h3>
       <label class="check"><input type="checkbox" id="alwaysOnTop"> Her zaman üstte</label>
       <label class="check"><input type="checkbox" id="openAtLogin"> Bilgisayar açılınca başlat</label>
+      <label class="check"><input type="checkbox" id="taskbarRate"> Görev çubuğunda dolar kuru göster</label>
       <p class="hint">Kısayol: <b id="shortcut">Ctrl+Shift+D</b> ile her yerden aç/kapat.</p>
       <div id="settingsErr" class="warn hidden"></div>
       <div class="buttons">

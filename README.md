@@ -31,9 +31,16 @@ Varsayılan: tüm kurlar canlı **Alış**, EUR/USD paritesine **-0,0100** düze
 - **Manuel**: kuru elle girin (ör. parite 1,0941 yerine **1,0741**). Manuel kur kaydedilir,
   uygulama kapanıp açılsa da kalır. Ana ekranda mor şerit manuel kur kullanıldığını gösterir;
   **Canlı kura dön** ile tek tıkla canlı kura dönülür.
-- Her zaman üstte, bilgisayar açılınca başlat
+- Her zaman üstte, bilgisayar açılınca başlat, görev çubuğunda dolar kuru
 
-ayar açılınca başlat
+## Pencere ve görev çubuğu
+
+- Pencere içeriği kadar yüksektir, boş alan kalmaz (ayarlar açılınca uzar, kapanınca kısalır).
+- Başlıktaki kaydırıcı pencerenin **şeffaflığını** ayarlar (%30 – %100); ayar kaydedilir.
+- **Görev çubuğunda dolar kuru**: Windows hava durumu kutusu gibi görev çubuğunun
+  üzerinde küçük bir kutuda hesapta kullanılan USD/TL kuru görünür (▲/▼ değişim).
+  Tıklayınca uygulama açılır/kapanır, sürükleyerek sağa sola taşınır, sağ tıkla kaldırılır.
+  Ayarlar > Genel veya tepsi menüsünden açılıp kapatılır.
 
 ## Kullanım
 

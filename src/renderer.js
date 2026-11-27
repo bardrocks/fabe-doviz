@@ -40,6 +40,15 @@
     }
     renderStatus();
     compute();
+    fit();
+  }
+
+  // ---------- Pencere boyu: içerik kadar ----------
+  let lastFit = 0;
+  function fit() {
+    const view = $('viewMain').classList.contains('hidden') ? $('viewSettings') : $('viewMain');
+    const h = document.querySelector('.titlebar').offsetHeight + view.scrollHeight;
+    if (h && h !== lastFit) { lastFit = h; window.api.fitHeight(h); }
   }
 
   function renderStatus() {
@@ -66,6 +75,7 @@
         : `Canlı kurlar güncel değil, canlı kurla hesap gösterilmiyor. ${err} "Yenile"ye basın.`;
       warn.classList.remove('hidden');
     }
+    fit();
   }
 
   // ---------- Hesap ----------
@@ -136,7 +146,7 @@
           <button class="link" id="reset-${id}" title="Bu kuru canlı Alış'a döndür">Canlı</button>
         </div>`;
       box.appendChild(div);
-      $(`src-${id}`).addEventListener('change', () => syncRateForm(p, true));
+      $(`src-${id}`).addEventListener('change', () => { syncRateForm(p, true); fit(); });
       $(`reset-${id}`).addEventListener('click', () => { $(`src-${id}`).value = 'alis'; syncRateForm(p); });
     }
   }
@@ -155,7 +165,8 @@
     if (manual && focusManual) { $(`man-${id}`).focus(); $(`man-${id}`).select(); }
   }
 
-  function openSettings() {
+  async function openSettings() {
+    settings = (await window.api.getInitial()).settings; // tepsi menüsünden değişmiş olabilir
     for (const p of PAIRS) {
       const id = safeId(p);
       const rs = settings.rates[p];
@@ -168,18 +179,22 @@
     }
     $('alwaysOnTop').checked = !!settings.alwaysOnTop;
     $('openAtLogin').checked = !!settings.openAtLogin;
+    $('taskbarRate').checked = !!settings.taskbarRate;
     $('settingsErr').classList.add('hidden');
     $('viewMain').classList.add('hidden');
     $('viewSettings').classList.remove('hidden');
+    fit();
   }
   function closeSettings() {
     $('viewSettings').classList.add('hidden');
     $('viewMain').classList.remove('hidden');
+    fit();
     $('in' + activeCur).focus();
   }
   function settingsError(msg) {
     $('settingsErr').textContent = msg;
     $('settingsErr').classList.remove('hidden');
+    fit();
   }
 
   const RANGES = { 'USD/TL': [1, 10000], 'EUR/TL': [1, 10000], 'EUR/USD': [0.5, 2] };
@@ -204,6 +219,7 @@
       rates,
       alwaysOnTop: $('alwaysOnTop').checked,
       openAtLogin: $('openAtLogin').checked,
+      taskbarRate: $('taskbarRate').checked,
     });
     closeSettings();
     renderRates();
@@ -223,7 +239,12 @@
     state = data.state;
     $('shortcut').textContent = data.shortcut;
     buildRateForms();
+    const op = $('opacity');
+    op.value = Math.round((settings.opacity || 1) * 100);
+    op.addEventListener('input', () => window.api.setOpacity(op.value / 100));
     renderRates();
+    new ResizeObserver(fit).observe($('viewMain'));
+    new ResizeObserver(fit).observe($('viewSettings'));
 
     window.api.onRates((s) => {
       // Hata durumunda son geçerli kurları koru, sadece durumu güncelle
